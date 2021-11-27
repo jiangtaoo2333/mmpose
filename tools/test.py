@@ -1,15 +1,16 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
+import mmcv
 import os
 import os.path as osp
-import warnings
-
-import mmcv
+import time
 import torch
+import warnings
 from mmcv import Config, DictAction
 from mmcv.cnn import fuse_conv_bn
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import get_dist_info, init_dist, load_checkpoint
+from thop import clever_format, profile
 
 from mmpose.apis import multi_gpu_test, single_gpu_test
 from mmpose.datasets import build_dataloader, build_dataset
@@ -137,6 +138,19 @@ def main():
 
     # build the model and load checkpoint
     model = build_posenet(cfg.model)
+    model_ = model
+    if hasattr(model, 'forward_dummy'):
+        model_.forward = model_.forward_dummy
+    else:
+        raise NotImplementedError(
+            'FLOPs counter is currently not currently supported with {}'.
+            format(model_.__class__.__name__))
+    # cal flops and params
+    input = torch.randn(1,3,cfg.data_cfg.image_size[0],cfg.data_cfg.image_size[0])
+    flops, params = profile(model_, inputs=(input, ))
+    flops, params = clever_format([flops, params], "%.3f")
+    print('flops:{} params{}'.format(flops,params))
+
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
