@@ -44,8 +44,8 @@ channel_cfg = dict(
 # model settings
 model = dict(
     type='TopDown',
-    pretrained='torchvision://resnet50',
-    backbone=dict(type='ResNet', depth=50),
+    pretrained='torchvision://resnet18',
+    backbone=dict(type='ResNet', depth=18),
     keypoint_head=dict(
         type='TopdownHeatmapSimpleHead',
         in_channels=2048,
@@ -107,8 +107,8 @@ data_root = '/jiangtao2/dataset/train/FreiHand'
 data = dict(
     samples_per_gpu=64,
     workers_per_gpu=2,
-    val_dataloader=dict(samples_per_gpu=128),
-    test_dataloader=dict(samples_per_gpu=128),
+    val_dataloader=dict(samples_per_gpu=32),
+    test_dataloader=dict(samples_per_gpu=32),
     train=dict(
         type='FreiHandDataset',
         ann_file=f'{data_root}/annotations/freihand_train.json',
