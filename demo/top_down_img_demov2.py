@@ -2,34 +2,13 @@
 import os
 import warnings
 from argparse import ArgumentParser
-import json
+
 from xtcocotools.coco import COCO
-from tqdm import tqdm
+
 from mmpose.apis import (inference_top_down_pose_model, init_pose_model,
                          vis_pose_result)
 from mmpose.datasets import DatasetInfo
 
-def getlist(dir,extension,Random=False):
-    list = []
-    for root, dirs, files in os.walk(dir, topdown=False):
-        for name in dirs:
-            print(os.path.join(root, name))
-        for name in files:
-            filename,ext = os.path.splitext(name)
-
-            if extension == ext:
-                list.append(os.path.join(root,name))
-                list[-1]  = list[-1].replace('\\','/')
-    if Random:
-        random.shuffle(list)
-    return list
-
-def getbox(json_file):
-    with open(json_file,'rb') as f:
-        data = json.load(f)
-    points = data['shapes'][0]['points']
-    x,y,w,h = points[0],points[1],points[2]-points[0],points[3]-points[1]
-    return [x,y,w,h]
 
 def main():
 
@@ -77,7 +56,7 @@ def main():
 
         assert args.show or (args.out_img_root != '')
 
-    # coco = COCO(args.json_file)
+    coco = COCO(args.json_file)
     # build the pose model from a config file and a checkpoint file
     pose_model = init_pose_model(
         args.pose_config, args.pose_checkpoint, device=args.device.lower())
@@ -92,8 +71,7 @@ def main():
     else:
         dataset_info = DatasetInfo(dataset_info)
 
-    # img_keys = list(coco.imgs.keys())
-    imgList = getlist(args.img_root,'.jpg')
+    img_keys = list(coco.imgs.keys())
 
     # optional
     return_heatmap = False
@@ -102,19 +80,22 @@ def main():
     output_layer_names = None
 
     # process each image
-    for i in tqdm(range(len(imgList))):
+    for i in range(len(img_keys)):
         print('i:',i)
-        print(imgList[i])
         # get bounding box annotations
-
-        image_name = imgList[i]
-
+        image_id = img_keys[i]
+        image = coco.loadImgs(image_id)[0]
+        image_name = os.path.join(args.img_root, image['file_name'])
+        ann_ids = coco.getAnnIds(image_id)
 
         # make person bounding boxes
         person_results = []
-        person = {}
-        person['bbox'] = getbox(image_name.replace('.jpg','.json'))
-        person_results.append(person)
+        for ann_id in ann_ids:
+            person = {}
+            ann = coco.anns[ann_id]
+            # bbox format is 'xywh'
+            person['bbox'] = ann['bbox']
+            person_results.append(person)
 
         # test a single image, with a list of bboxes
         pose_results, returned_outputs = inference_top_down_pose_model(
@@ -127,16 +108,27 @@ def main():
             dataset_info=dataset_info,
             return_heatmap=return_heatmap,
             outputs=output_layer_names)
-        pose = pose_results[0]['keypoints']
-        with open(image_name.replace('.jpg','.txt'),'w') as f:
-            for i in range(pose.shape[0]):
-                f.write(str(pose[i][0]) + ' ')
-                f.write(str(pose[i][1]) + '\n')
-        continue
-        # print(type(pose_results))
-        # print(pose_results)
-        # import time
-        # time.sleep(10000)
+        print(type(pose_results))
+        print(pose_results)
+        import time
+        time.sleep(10000)
+        if args.out_img_root == '':
+            out_file = None
+        else:
+            os.makedirs(args.out_img_root, exist_ok=True)
+            out_file = os.path.join(args.out_img_root, f'vis_{i}.jpg')
+
+        vis_pose_result(
+            pose_model,
+            image_name,
+            pose_results,
+            dataset=dataset,
+            dataset_info=dataset_info,
+            kpt_score_thr=args.kpt_thr,
+            radius=args.radius,
+            thickness=args.thickness,
+            show=args.show,
+            out_file=out_file)
 
 
 if __name__ == '__main__':
