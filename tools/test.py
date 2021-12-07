@@ -138,18 +138,6 @@ def main():
 
     # build the model and load checkpoint
     model = build_posenet(cfg.model)
-    model_ = model
-    if hasattr(model, 'forward_dummy'):
-        model_.forward = model_.forward_dummy
-    else:
-        raise NotImplementedError(
-            'FLOPs counter is currently not currently supported with {}'.
-            format(model_.__class__.__name__))
-    # cal flops and params
-    input = torch.randn(1,3,cfg.data_cfg.image_size[0],cfg.data_cfg.image_size[0])
-    flops, params = profile(model_, inputs=(input, ))
-    flops, params = clever_format([flops, params], "%.3f")
-    print('flops:{} params{}'.format(flops,params))
 
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
