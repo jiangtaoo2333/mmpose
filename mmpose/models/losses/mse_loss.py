@@ -4,6 +4,23 @@ import torch.nn as nn
 
 from ..builder import LOSSES
 
+@LOSSES.register_module()
+class RMGazeMSELoss(nn.Module):
+    '''
+    mse loss for gaze
+    '''
+    def __init__(self):
+        super().__init__()
+
+        self.mse = nn.MSELoss(reduction='mean')
+        self.mse = self.mse.cuda()
+
+    def forward(self, output, target):
+
+        target = target.view_as(output).float()
+        loss = self.mse(output, target).sum()
+
+        return loss
 
 @LOSSES.register_module()
 class JointsMSELoss(nn.Module):

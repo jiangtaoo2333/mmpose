@@ -3,7 +3,7 @@
 * @Author       : jiangtao
 * @Date         : 2021-12-07 16:26:51
 * @Email        : jiangtaoo2333@163.com
-* @LastEditTime : 2022-01-11 14:23:30
+* @LastEditTime : 2022-01-20 09:31:37
 * @Description  : 
 '''
 import json
@@ -298,7 +298,7 @@ def getbox(box):
 if __name__ == '__main__':
 
     srcDir = 'D:/images_check/gazePoints/'
-    targetFile = srcDir + 'gazePoints_val.json'
+    targetFile = srcDir + 'gazePoints_train.json'
 
     dataDict = {}
     images = []
@@ -313,7 +313,7 @@ if __name__ == '__main__':
 
     imgId = 0
     ptsId = 0
-    for imgFile in tqdm(imgList[int(0.8*N):]):
+    for imgFile in tqdm(imgList[0:int(0.8*N)]):
         imgFile = imgFile.replace('\\','/')
         jsonFile = osp.splitext(imgFile)[0] + '.json'
 
@@ -336,6 +336,7 @@ if __name__ == '__main__':
         annotation['bbox'] = getbox(box)
         annotation['iscrowd'] = 0
         annotation['category_id'] = 1
+        annotation['gaze'] = look_vec.tolist()
         annotation['area'] = 10000
         annotations.append(annotation)
         ptsId += 1

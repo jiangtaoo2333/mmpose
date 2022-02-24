@@ -3,33 +3,34 @@
 * @Author       : jiangtao
 * @Date         : 2021-12-13 14:18:45
 * @Email        : jiangtaoo2333@163.com
-* @LastEditTime : 2022-01-11 20:33:12
+* @LastEditTime : 2022-02-23 17:45:36
 * @Description  : 
 '''
 import cv2
 import json
 import os
 import os.path as osp
+import sys
+import time
 import warnings
 from argparse import ArgumentParser
 from tqdm import tqdm
 from xtcocotools.coco import COCO
-import time
+
 from mmpose.apis import (inference_top_down_pose_model, init_pose_model,
                          vis_pose_result)
 from mmpose.datasets import DatasetInfo
 
-# print('---------')
+
 dirpath = osp.dirname(osp.abspath(__file__)).replace('\\','/')
 dirpath = osp.dirname(dirpath)
-# print(dirpath)
 
 
 class handAlignment():
 
     def __init__(self,
                 pose_config = '{}/configs/face/2d_kpt_sview_rgb_img/topdown_heatmap/dms/res50_dms_256x256.py'.format(dirpath),
-                pose_checkpoint = '{}/work_dirs/res50_dms_256x256/epoch_6.pth'.format(dirpath),
+                pose_checkpoint = '{}/work_dirs/res50_dms_256x256/best_NME_epoch_42.pth'.format(dirpath),
                 device = 'cuda:0'):
         
         self.pose_config = pose_config
@@ -88,6 +89,7 @@ class handAlignment():
                 out_file=outfile)
         return img
 
+handAlign = handAlignment()
 
 if __name__ == '__main__':
 
@@ -95,16 +97,13 @@ if __name__ == '__main__':
 
     img = cv2.imread(filename,1)
 
-    handAlign = handAlignment()
+    
+
+    # input box is w y w h format
+    # pose_results is a list of dict, keys are bbox and keypoints
+    # returned_outputs is a list of dict, keys are heatmap
 
     pose_results, returned_outputs = handAlign.alignment(img,[495,221,400,400])
-
-    print(type(pose_results))
-    print(type(returned_outputs))
-    print(len(pose_results))
-    print(len(returned_outputs))
-    print(pose_results[0].keys())
-    print(returned_outputs[0].keys())
 
     print(pose_results[0]['keypoints'])
 

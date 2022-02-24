@@ -21,6 +21,7 @@ from .shufflenet_v2 import ShuffleNetV2
 from .tcn import TCN
 from .vgg import VGG
 from .vipnas_resnet import ViPNAS_ResNet
+from .resnet_RM import RMResNet
 
 __all__ = [
     'AlexNet', 'HourglassNet', 'HourglassAENet', 'HRNet', 'MobileNetV2',

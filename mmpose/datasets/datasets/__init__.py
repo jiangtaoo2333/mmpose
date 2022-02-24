@@ -22,7 +22,7 @@ from .top_down import (TopDownAicDataset, TopDownCocoDataset,
                        TopDownJhmdbDataset, TopDownMhpDataset,
                        TopDownMpiiDataset, TopDownMpiiTrbDataset,
                        TopDownOCHumanDataset, TopDownPoseTrack18Dataset)
-
+# from .gaze import GazeDMSDataset
 __all__ = [
     'TopDownCocoDataset', 'BottomUpCocoDataset', 'BottomUpMhpDataset',
     'BottomUpAicDataset', 'BottomUpCocoWholeBodyDataset', 'TopDownMpiiDataset',

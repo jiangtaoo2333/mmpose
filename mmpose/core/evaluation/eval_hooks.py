@@ -1,14 +1,17 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import os.path as osp
 import tempfile
+import torch.distributed as dist
 import warnings
-
+from math import inf
 from mmcv.runner import DistEvalHook as _DistEvalHook
 from mmcv.runner import EvalHook as _EvalHook
+from torch.nn.modules.batchnorm import _BatchNorm
 
 MMPOSE_GREATER_KEYS = [
     'acc', 'ap', 'ar', 'pck', 'auc', '3dpck', 'p-3dpck', '3dauc', 'p-3dauc'
 ]
-MMPOSE_LESS_KEYS = ['loss', 'epe', 'nme', 'mpjpe', 'p-mpjpe', 'n-mpjpe']
+MMPOSE_LESS_KEYS = ['loss', 'epe', 'nme', 'mpjpe', 'p-mpjpe', 'n-mpjpe','gaze_loss']
 
 
 class EvalHook(_EvalHook):
@@ -131,6 +134,9 @@ class DistEvalHook(_DistEvalHook):
             runner (:obj:`mmcv.Runner`): The underlined training runner.
             results (list): Output results.
         """
+        #self.eval_kwargs: 'metric' = ['NME']
+        #self.key_indicator: 'NME'
+        #eval_res is a dict
         with tempfile.TemporaryDirectory() as tmp_dir:
             eval_res = self.dataloader.dataset.evaluate(
                 results,
@@ -149,3 +155,39 @@ class DistEvalHook(_DistEvalHook):
             return eval_res[self.key_indicator]
 
         return None
+
+    def _do_evaluate(self, runner):
+        """perform evaluation and save ckpt."""
+        # Synchronization of BatchNorm's buffer (running_mean
+        # and running_var) is not supported in the DDP of pytorch,
+        # which may cause the inconsistent performance of models in
+        # different ranks, so we broadcast BatchNorm's buffers
+        # of rank 0 to other ranks to avoid this.
+        if self.broadcast_bn_buffer:
+            model = runner.model
+            for name, module in model.named_modules():
+                if isinstance(module,
+                              _BatchNorm) and module.track_running_stats:
+                    dist.broadcast(module.running_var, 0)
+                    dist.broadcast(module.running_mean, 0)
+
+        tmpdir = self.tmpdir
+        if tmpdir is None:
+            tmpdir = osp.join(runner.work_dir, '.eval_hook')
+
+        results = self.test_fn(
+            runner.model,
+            self.dataloader,
+            tmpdir=tmpdir,
+            gpu_collect=self.gpu_collect)
+        #results list of dict,kyes = [gaze,preds,boxes,image_paths,bbox_ids,ouput_heatmap]
+        #注意是以batch为单位，不是单张图片
+
+        if runner.rank == 0:
+            print('\n')
+            runner.log_buffer.output['eval_iter_num'] = len(self.dataloader)
+            key_score = self.evaluate(runner, results)
+            # the key_score may be `None` so it needs to skip the action to
+            # save the best checkpoint
+            if self.save_best and key_score:
+                self._save_ckpt(runner, key_score)

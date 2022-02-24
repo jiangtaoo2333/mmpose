@@ -101,6 +101,10 @@ class BasePose(nn.Module, metaclass=ABCMeta):
                 DDP, it means the batch size on each GPU), which is used for
                 averaging the logs.
         """
+        '''
+        data_batch.keys() : img target target_weight gaze img_metas gaze
+        '''
+
         losses = self.forward(**data_batch)
 
         loss, log_vars = self._parse_losses(losses)

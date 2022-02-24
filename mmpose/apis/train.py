@@ -4,7 +4,7 @@ import warnings
 import torch
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import DistSamplerSeedHook, EpochBasedRunner, OptimizerHook
-
+from mmpose.core.runners.rm_epoch_based_runner import RMEpochBasedRunner
 from mmpose.core import DistEvalHook, EvalHook, build_optimizers
 from mmpose.core.distributed_wrapper import DistributedDataParallelWrapper
 from mmpose.datasets import build_dataloader, build_dataset
@@ -100,7 +100,7 @@ def train_model(model,
     # build runner
     optimizer = build_optimizers(model, cfg.optimizer)
 
-    runner = EpochBasedRunner(
+    runner = RMEpochBasedRunner(
         model,
         optimizer=optimizer,
         work_dir=cfg.work_dir,
@@ -150,7 +150,7 @@ def train_model(model,
         runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
 
     if cfg.resume_from:
-        runner.resume(cfg.resume_from)
+        runner.resume(cfg.resume_from,resume_optimizer=cfg.get('resume_optimizer',True))
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
     runner.run(data_loaders, cfg.workflow, cfg.total_epochs)
