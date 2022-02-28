@@ -43,7 +43,7 @@ class TopDownRandomFlip:
                 results['ann_info']['flip_pairs'])
             center[0] = img.shape[1] - center[0] - 1
 
-            if['gaze' in results]:
+            if('gaze' in results):
                 results['gaze'][0] *= -1
 
         results['img'] = img
