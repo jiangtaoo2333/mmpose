@@ -905,9 +905,9 @@ class LiteHRNet(nn.Module):
         num_modules = stages_spec['num_modules'][stage_index]
         num_branches = stages_spec['num_branches'][stage_index]
         num_blocks = stages_spec['num_blocks'][stage_index]
-        reduce_ratio = stages_spec['reduce_ratios'][stage_index]
-        with_fuse = stages_spec['with_fuse'][stage_index]
         module_type = stages_spec['module_type'][stage_index]
+        with_fuse = stages_spec['with_fuse'][stage_index]
+        reduce_ratio = stages_spec['reduce_ratios'][stage_index]
 
         modules = []
         for i in range(num_modules):

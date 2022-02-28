@@ -22,10 +22,11 @@ from .tcn import TCN
 from .vgg import VGG
 from .vipnas_resnet import ViPNAS_ResNet
 from .resnet_RM import RMResNet
+from .rm_csp_darknet import RMCSPDarknet
 
 __all__ = [
     'AlexNet', 'HourglassNet', 'HourglassAENet', 'HRNet', 'MobileNetV2',
     'MobileNetV3', 'RegNet', 'ResNet', 'ResNetV1d', 'ResNeXt', 'SCNet',
     'SEResNet', 'SEResNeXt', 'ShuffleNetV1', 'ShuffleNetV2', 'CPM', 'RSN',
-    'MSPN', 'ResNeSt', 'VGG', 'TCN', 'ViPNAS_ResNet', 'LiteHRNet'
+    'MSPN', 'ResNeSt', 'VGG', 'TCN', 'ViPNAS_ResNet', 'LiteHRNet','RMCSPDarknet'
 ]

@@ -18,7 +18,7 @@ def parse_args():
         '--shape',
         type=int,
         nargs='+',
-        default=[256, 192],
+        default=[1, 256, 256],
         help='input image size')
     args = parser.parse_args()
     return args
@@ -32,8 +32,8 @@ def main():
         input_shape = (3, args.shape[0], args.shape[0])
     elif len(args.shape) == 2:
         input_shape = (3, ) + tuple(args.shape)
-    else:
-        raise ValueError('invalid input shape')
+    elif len(args.shape) == 3:
+        input_shape = tuple(args.shape)
 
     cfg = Config.fromfile(args.config)
     model = build_posenet(cfg.model)
