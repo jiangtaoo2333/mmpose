@@ -3,9 +3,10 @@
 * @Author       : jiangtao
 * @Date         : 2021-12-13 14:18:45
 * @Email        : jiangtaoo2333@163.com
-* @LastEditTime : 2022-02-23 17:45:36
+* @LastEditTime : 2022-03-02 14:11:31
 * @Description  : 
 '''
+import argparse
 import cv2
 import json
 import os
@@ -21,10 +22,16 @@ from mmpose.apis import (inference_top_down_pose_model, init_pose_model,
                          vis_pose_result)
 from mmpose.datasets import DatasetInfo
 
-
 dirpath = osp.dirname(osp.abspath(__file__)).replace('\\','/')
 dirpath = osp.dirname(dirpath)
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Convert MMDetection models to ONNX')
+    parser.add_argument('config', help='test config file path')
+    parser.add_argument('checkpoint', help='checkpoint file')
+    args = parser.parse_args()
+    return args
 
 class handAlignment():
 
@@ -40,9 +47,10 @@ class handAlignment():
 
         self.pose_model = init_pose_model(
                     self.pose_config, self.pose_checkpoint, device=self.device.lower())
-        
+
         self.dataset = self.pose_model.cfg.data['test']['type']
         self.dataset_info = self.pose_model.cfg.data['test'].get('dataset_info', None)
+        # dataset is a str,dataset_info is a dict
         if self.dataset_info is None:
             warnings.warn(
                 'Please set `dataset_info` in the config.'
@@ -50,7 +58,8 @@ class handAlignment():
                 DeprecationWarning)
         else:
             self.dataset_info = DatasetInfo(self.dataset_info)
-    
+        # dataset_info is a instance of DatasetInfo
+
     def alignment(self,img,box):
         '''
         box:[x,y,w,h]
@@ -93,19 +102,22 @@ handAlign = handAlignment()
 
 if __name__ == '__main__':
 
-    filename = './demo/images/face.jpg'
+    args = parse_args()
+    handAlign = handAlignment(pose_config=args.config,
+                            pose_checkpoint=args.checkpoint)
 
+    filename = './demo/images/face.jpg'
     img = cv2.imread(filename,1)
 
-    
-
     # input box is w y w h format
-    # pose_results is a list of dict, keys are bbox and keypoints
-    # returned_outputs is a list of dict, keys are heatmap
+    # pose_results is a list of dict for every box, keys are bbox and keypoints
+    # returned_outputs is a list of dict for every box, keys are heatmap
 
     pose_results, returned_outputs = handAlign.alignment(img,[495,221,400,400])
 
-    print(pose_results[0]['keypoints'])
+    print(returned_outputs[0]['heatmap'].shape)
+    print(returned_outputs[0]['heatmap'][0][0][0][0])
+    print(returned_outputs[0]['heatmap'][-1][-1][-1][-1])
 
     img = handAlign.save(img,
                 filename.replace('.jpg','_res.jpg'),

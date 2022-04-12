@@ -108,10 +108,10 @@ def main():
             dataset_info=dataset_info,
             return_heatmap=return_heatmap,
             outputs=output_layer_names)
-        print(type(pose_results))
-        print(pose_results)
-        import time
-        time.sleep(10000)
+        # print(type(pose_results))
+        # print(pose_results)
+        # import time
+        # time.sleep(10000)
         if args.out_img_root == '':
             out_file = None
         else:

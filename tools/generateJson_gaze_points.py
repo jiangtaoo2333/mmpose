@@ -3,7 +3,7 @@
 * @Author       : jiangtao
 * @Date         : 2021-12-07 16:26:51
 * @Email        : jiangtaoo2333@163.com
-* @LastEditTime : 2022-01-20 09:31:37
+* @LastEditTime : 2022-03-21 18:00:02
 * @Description  : 
 '''
 import json
@@ -321,12 +321,7 @@ if __name__ == '__main__':
             box, landmarks, eye_c, look_vec = get_box_landmarks_gaze_UnityEyes(jsonFile)
         else:
             res = get_box_landmarks_gaze_DMS(jsonFile,True)
-            if False == res:
-                os.remove(jsonFile)
-                os.remove(jsonFile.replace('.json','.jpg'))
-                continue
-            else:
-                box, landmarks, eye_c, look_vec = res
+            box, landmarks, eye_c, look_vec = res
 
         annotation = {}
         annotation['image_id'] = imgId

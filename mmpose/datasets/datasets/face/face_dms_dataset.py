@@ -8,7 +8,7 @@ from mmcv import Config
 
 from mmpose.datasets.builder import DATASETS
 from ..base import Kpt2dSviewRgbImgTopDownDataset
-
+from tqdm import tqdm
 
 @DATASETS.register_module()
 class FaceDMSDataset(Kpt2dSviewRgbImgTopDownDataset):
@@ -68,7 +68,7 @@ class FaceDMSDataset(Kpt2dSviewRgbImgTopDownDataset):
         gt_db = []
         bbox_id = 0
         num_joints = self.ann_info['num_joints']
-        for img_id in self.img_ids:
+        for img_id in tqdm(self.img_ids):
 
             ann_ids = self.coco.getAnnIds(imgIds=img_id, iscrowd=False)
             objs = self.coco.loadAnns(ann_ids)

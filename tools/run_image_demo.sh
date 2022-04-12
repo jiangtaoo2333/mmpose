@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+CONFIG=$1
+CHECKPOINT=$2
 
-# PYTHONPATH="$(dirname $0)/.." \
 export PYTHONPATH=`pwd`
 echo $PYTHONPATH
-python ./demo/inference_by_jiangtao_face.py 
+python ./demo/inference_by_jiangtao_face.py $CONFIG $CHECKPOINT

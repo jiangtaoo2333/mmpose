@@ -261,11 +261,11 @@ class TopDownGenerateTarget:
                  encoding='MSRA',
                  unbiased_encoding=False):
         self.sigma = sigma
-        self.unbiased_encoding = unbiased_encoding
         self.kernel = kernel
         self.valid_radius_factor = valid_radius_factor
         self.target_type = target_type
         self.encoding = encoding
+        self.unbiased_encoding = unbiased_encoding
 
     def _msra_generate_target(self, cfg, joints_3d, joints_3d_visible, sigma):
         """Generate the target heatmap via "MSRA" approach.

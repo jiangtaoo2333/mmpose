@@ -86,11 +86,11 @@ train_pipeline = [
         type='TopDownGetRandomScaleRotation', rot_factor=30,
         scale_factor=0.25),
     dict(type='TopDownAffine'),
-    dict(type='ToTensor'),
+    dict(type='ToTensor',color_type='gray'),
     dict(
         type='NormalizeTensor',
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]),
+        mean=[0,],
+        std=[1,]),
     dict(type='TopDownGenerateTarget', sigma=1.5),
     dict(
         type='Collect',
@@ -104,11 +104,11 @@ train_pipeline = [
 val_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='TopDownAffine'),
-    dict(type='ToTensor'),
+    dict(type='ToTensor',color_type='gray'),
     dict(
         type='NormalizeTensor',
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]),
+        mean=[0,],
+        std=[1,]),
     dict(
         type='Collect',
         keys=['img'],

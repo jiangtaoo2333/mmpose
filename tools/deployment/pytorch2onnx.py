@@ -121,7 +121,7 @@ def parse_args():
         '--shape',
         type=int,
         nargs='+',
-        default=[1, 3, 256, 192],
+        default=[1, 1, 256, 256],
         help='input size')
     args = parser.parse_args()
     return args

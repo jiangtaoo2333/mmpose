@@ -8,7 +8,7 @@ from mmcv.parallel import DataContainer as DC
 from mmcv.utils import build_from_cfg
 from numpy import random
 from torchvision.transforms import functional as F
-
+import cv2
 from ..builder import PIPELINES
 
 try:
@@ -26,9 +26,20 @@ class ToTensor:
     Args:
         results (dict): contain all information about training.
     """
+    def __init__(self,
+                 color_type='color'):
+        self.color_type = color_type
 
     def __call__(self, results):
+
+        # h w 3 -> h w 1
+        if self.color_type == 'gray':
+            results['img'] = cv2.cvtColor(results['img'], cv2.COLOR_RGB2GRAY)
+            results['img'] = results['img'][:,:,np.newaxis]
+
+        # h w 1 -> 1 h w
         results['img'] = F.to_tensor(results['img'])
+
         return results
 
 
